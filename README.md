@@ -2,8 +2,21 @@
 
 Custom beat to fetch Cloudflare logs via the Enterprise Log Share API.
 
-Ensure that this folder is at the following location:
-`${GOPATH}/github.com/hartfordfive`
+
+## Updated Version
+
+Fork by Edrans Jacob Verhoeks <jjverhoeks@edrans.com>
+
+https://github.com/edrans/cloudflarebeat/
+
+Fixes:
+1. Building binaries with docker environment: `./build.sh`
+2. Fixed path for StateFile with Disk option
+3. Added retry when Cloudflare API gives a 429 (too many requests)
+
+
+
+
 
 ## Disclaimer
 
