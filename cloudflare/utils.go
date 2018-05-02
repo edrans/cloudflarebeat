@@ -165,10 +165,13 @@ func BuildMapStr(logEntry map[string]interface{}) common.MapStr {
 			entry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["profile"] = logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["profile"]
 			entry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["ruleId"] = logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["profile"]
 			entry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["ruleMessage"] = logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["profile"]
+
 			if !isZero(logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["ruleDetail"]) {
 				entry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["ruleDetail"] = logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["ruleDetail"]
 			}
-			entry["waf"].(map[string]interface{})["matchedVar"] = logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["matchedVar"]
+			if !isZero(logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["matchedVar"]) {
+				entry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["matchedVar"] = logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["matchedVar"]
+			}
 			if !isZero(logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["activatedRules"]) {
 				entry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["activatedRules"] = logEntry["edge"].(map[string]interface{})["waf"].(map[string]interface{})["activatedRules"]
 			}
