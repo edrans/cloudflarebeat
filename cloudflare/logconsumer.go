@@ -22,10 +22,11 @@ type LogConsumer struct {
 	CompletedNotifier     chan bool
 	ProcessorTerminateSig chan bool
 	WaitGroup             sync.WaitGroup
+	StatePath             string
 }
 
 // NewLogConsumer reutrns a instance of the LogConsumer struct
-func NewLogConsumer(cfEmail string, cfAPIKey string, numSegments int, eventBufferSize int, processors int) *LogConsumer {
+func NewLogConsumer(cfEmail string, cfAPIKey string, cfStatePath string, numSegments int, eventBufferSize int, processors int) *LogConsumer {
 
 	lc := &LogConsumer{
 		TotalLogFileSegments:  numSegments,
@@ -34,11 +35,13 @@ func NewLogConsumer(cfEmail string, cfAPIKey string, numSegments int, eventBuffe
 		CompletedNotifier:     make(chan bool, 1),
 		ProcessorTerminateSig: make(chan bool, processors),
 		WaitGroup:             sync.WaitGroup{},
+		StatePath:             cfStatePath,
 	}
 	lc.cloudflareClient = NewClient(map[string]interface{}{
-		"api_key": cfAPIKey,
-		"email":   cfEmail,
-		"debug":   false,
+		"api_key":    cfAPIKey,
+		"email":      cfEmail,
+		"debug":      false,
+		"state_path": cfStatePath,
 	})
 	return lc
 }
@@ -73,8 +76,7 @@ func (lc *LogConsumer) DownloadCurrentLogFiles(zoneTag string, timeStart int, ti
 			}
 
 			lc.LogFilesReady <- filename
-			logp.Info("Total download time for log file: %d seconds", (int(time.Now().UTC().Unix()) - timeNow))
-			//logp.Info("Total download time for log file: %d seconds", (int(time.Now().UTC().Unix()) - timeNow))
+			logp.Info("Total download time for log file: %s %d seconds", filename, (int(time.Now().UTC().Unix()) - timeNow))
 
 		}(lc, i, currTimeStart, currTimeEnd)
 
@@ -109,9 +111,13 @@ func (lc *LogConsumer) PrepareEvents() {
 			logp.Info("Done preparing events for publishing. Returning from goroutine.")
 			return
 		case logFileName := <-lc.LogFilesReady:
+			if logFileName == "" {
+				logp.Err("Receiving empty logfilename")
+				continue
+			}
 
-			logp.Info("Log file %s ready for processing.", logFileName)
-			fh, err := os.Open(logFileName)
+			logp.Info("Log file [%s] ready for processing.", logFileName)
+			fh, err := os.Open(filepath.Join(lc.StatePath, logFileName))
 			if err != nil {
 				logp.Err("Could not open gziped file for reading: %v", err)
 				DeleteLogLife(logFileName)
@@ -135,7 +141,11 @@ func (lc *LogConsumer) PrepareEvents() {
 			for scanner.Scan() {
 				logItem = scanner.Bytes()
 				err := ffjson.Unmarshal(logItem, &l)
-				if err == nil {
+				if len(l) == 0 {
+					logp.Err("Len = 0")
+					continue
+				}
+				if err == nil && l != nil {
 					evt = BuildMapStr(l)
 					evt["@timestamp"] = common.Time(time.Unix(0, int64(l["timestamp"].(float64))))
 					evt["type"] = "cloudflare"

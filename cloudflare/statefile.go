@@ -111,7 +111,7 @@ func (s *StateFile) initializeStateFileValues() {
 func (s *StateFile) loadFromDisk() error {
 
 	sfName := filepath.Join(s.FilePath, s.FileName)
-
+	logp.Info("Trying to open: %s", sfName)
 	// Create it if it doesn't exist
 	if _, err := os.Stat(sfName); os.IsNotExist(err) {
 		var file, err = os.Create(sfName)
@@ -259,7 +259,7 @@ func (s *StateFile) saveToDisk() error {
 	s.properties.LastUpdateTS = int(time.Now().Unix())
 
 	// open file using READ & WRITE permission
-	var file, err = os.OpenFile(s.FileName, os.O_RDWR, 0644)
+	var file, err = os.OpenFile(filepath.Join(s.FilePath, s.FileName), os.O_RDWR, 0644)
 	defer file.Close()
 	if err != nil {
 		return err
