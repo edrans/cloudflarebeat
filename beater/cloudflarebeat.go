@@ -5,12 +5,13 @@ import (
 	//"sync"
 	"time"
 
+	"github.com/edrans/cloudflarebeat/cloudflare"
+	"github.com/edrans/cloudflarebeat/config"
+
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
-	"github.com/hartfordfive/cloudflarebeat/cloudflare"
-	"github.com/hartfordfive/cloudflarebeat/config"
 )
 
 const (

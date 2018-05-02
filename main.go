@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"github.com/elastic/beats/libbeat/beat"
+	"github.com/edrans/cloudflarebeat/beater"
 
-	"github.com/hartfordfive/cloudflarebeat/beater"
+	"github.com/elastic/beats/libbeat/beat"
 )
 
 func main() {
